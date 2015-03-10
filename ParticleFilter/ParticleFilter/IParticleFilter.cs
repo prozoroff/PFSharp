@@ -11,9 +11,9 @@ namespace ParticleFilter
     /// </summary>
     public interface IParticleFilter<TParticle>
     {
-        void GenerateParticles(List<TParticle> collection, int numberOfParticles, Func<double[], TParticle> creator, IList<IDistribution> distributions);
-        void Resample();
-        void Predict();
+        void GenerateParticles(int numberOfParticles, Func<double[], TParticle> creator, IList<IDistribution> distributions);
+        void Resample(int sampleCount);
+        void Predict(float effectiveCountMinRatio, int sampleCount);
         void Update();
     }
 }

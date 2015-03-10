@@ -12,7 +12,7 @@ namespace ParticleFilterDemo
         static void Main(string[] args)
         {
             IParticleFilter<FeatureParticle> filter = new FeatureParticleFilter();
-            filter.GenerateParticles( new List<FeatureParticle>(), 1000,  //particles' count
+            filter.GenerateParticles( 1000,  //particles' count
                                            FeatureParticle.FromArray, //convert arr => position (create from array)
                                            new List<IDistribution>()
                                            { 

@@ -41,7 +41,7 @@ namespace ParticleFilter
             };
         }
 
-        object ICloneable.Clone()
+        public object Clone()
         {
             return new FeatureParticle
             {
