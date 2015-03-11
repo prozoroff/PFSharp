@@ -6,25 +6,13 @@ using System.Threading.Tasks;
 
 namespace ParticleFilter
 {
-    public class RandomProportional : Random
+    public static class RandomProportional
     {
-        private int _maxValue;
+        static Random random = new Random();
 
-        public RandomProportional(int maxValue)
+        public static double NextDouble(int maxValue)
         {
-            _maxValue = maxValue;
-        }
-
-        // The Sample method generates a distribution proportional to the value  
-        // of the random numbers, in the range [0.0, 1.0]. 
-        protected override double Sample()
-        {
-            return Math.Sqrt(base.Sample());
-        }
-
-        public double GenerateNext()
-        {
-            return (Sample() * _maxValue);
+            return random.NextDouble() * maxValue;
         }
     }
 }

@@ -8,13 +8,11 @@ namespace ParticleFilter
 {
     public class UniformDistribution : IDistribution
     {
-        private RandomProportional _random;
         private int _maxValue;
 
         public UniformDistribution(int maxValue)
         {
             _maxValue = maxValue;
-            _random = new RandomProportional(_maxValue);
         }
 
         public object Clone()
@@ -24,7 +22,7 @@ namespace ParticleFilter
 
         public double Generate()
         {
-            return _random.GenerateNext();
+            return RandomProportional.NextDouble(_maxValue);
         }
     }
     

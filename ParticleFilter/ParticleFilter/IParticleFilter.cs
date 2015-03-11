@@ -15,5 +15,7 @@ namespace ParticleFilter
         void Resample(int sampleCount);
         void Predict(float effectiveCountMinRatio, int sampleCount);
         void Update();
+
+        IList<FeatureParticle> Particles { get; }
     }
 }

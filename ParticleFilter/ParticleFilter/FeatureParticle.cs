@@ -12,11 +12,10 @@ namespace ParticleFilter
         public double Weight { get; set; }
         public PointF Position { get; set; }
         private int _variance = 10;//FIXME
-        private RandomProportional random;
 
         public FeatureParticle()
         {
-            random = new RandomProportional(_variance);
+
         }
 
         public void Drift()
@@ -28,8 +27,8 @@ namespace ParticleFilter
         {
             this.Position = new PointF
             {
-                X = this.Position.X + random.Next(),
-                Y = this.Position.Y + random.Next(),
+                X = this.Position.X + (float)RandomProportional.NextDouble(_variance),
+                Y = this.Position.Y + (float)RandomProportional.NextDouble(_variance)
             };
         }
 

@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using ParticleFilter;
+using System.Windows.Forms;
 
 namespace ParticleFilterDemo
 {
-    public class Program
+    static class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
         {
-            IParticleFilter<FeatureParticle> filter = new FeatureParticleFilter();
-            filter.GenerateParticles( 1000,  //particles' count
-                                           FeatureParticle.FromArray, //convert arr => position (create from array)
-                                           new List<IDistribution>()
-                                           { 
-                                               new UniformDistribution(320),
-                                               new UniformDistribution(240)
-                                           });
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
         }
     }
 }
