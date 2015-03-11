@@ -23,14 +23,13 @@ namespace ParticleFilter
             }
         }
 
-        public void GenerateParticles(int numberOfParticles, Func<double[], FeatureParticle> creator, IList<IDistribution> distributions)
+        public void GenerateParticles(int numberOfParticles, IList<IDistribution> distributions)
         {
             if (_particles == null)
                 throw new ArgumentNullException("The provided collection must not be null.");
 
             var nDim = distributions.Count;
 
-            /**************** make particles *****************/
             for (int i = 0; i < numberOfParticles; i++)
             {
                 var randomParam = new double[nDim];
@@ -39,7 +38,7 @@ namespace ParticleFilter
                     randomParam[dimIdx] = distributions[dimIdx].Generate();
                 }
 
-                var p = creator(randomParam);
+                var p = FeatureParticle.FromArray(randomParam);
                 p.Weight = 1d / numberOfParticles;
 
                 _particles.Add(p);
@@ -50,8 +49,8 @@ namespace ParticleFilter
         {
             var resampledParticles = new List<FeatureParticle>(sampleCount);
 
-            var drawnParticles = Draw(_particles.Count);
-            foreach (var dP in drawnParticles)
+            var filteredParticles = _filterParticles(_particles.Count);
+            foreach (var dP in filteredParticles)
             {
                 var newP = (FeatureParticle)dP.Clone();
                 newP.Weight = 1d / _particles.Count;
@@ -61,9 +60,8 @@ namespace ParticleFilter
             return resampledParticles;
         }
 
-        IList<FeatureParticle> Draw(int sampleCount)
+        private IList<FeatureParticle> _filterParticles(int sampleCount)
         {
-            /*************** calculate cumulative weights ****************/
             double[] cumulativeWeights = new double[_particles.Count];
             
             int cumSumIdx = 0;
@@ -73,41 +71,36 @@ namespace ParticleFilter
                 cumSum += p.Weight;
                 cumulativeWeights[cumSumIdx++] = cumSum;
             }
-            /*************** calculate cumulative weights ****************/
-            
-            /*************** re-sample particles ****************/
+
             var maxCumWeight = cumulativeWeights[_particles.Count - 1];
             var minCumWeight = cumulativeWeights[0];
 
-            var drawnParticles = new List<FeatureParticle>();
+            var filteredParticles = new List<FeatureParticle>();
 
             double initialWeight = 1d / _particles.Count;
             
-            Random rand = new Random();
-            
             for (int i = 0; i < sampleCount; i++)
             {
-                var randWeight = minCumWeight + rand.NextDouble() * (maxCumWeight - minCumWeight);
+                var randWeight = minCumWeight + RandomProportional.NextDouble(1) * (maxCumWeight - minCumWeight);
             
                 int particleIdx = 0;
-                while (cumulativeWeights[particleIdx] < randWeight) //find particle's index
+                while (cumulativeWeights[particleIdx] < randWeight) 
                 {
                     particleIdx++;
                 }
             
                 var p = _particles[particleIdx];
-                drawnParticles.Add(p);
+                filteredParticles.Add(p);
             }
-            /*************** re-sample particles ****************/
 
-            return drawnParticles;
+            return filteredParticles;
         }
 
         public void Predict(float effectiveCountMinRatio)
         {
             List<FeatureParticle> newParticles = null;
-            var effectiveCountRatio = (double)effectiveParticleCount(GetNormalizedWeights(_particles)) / _particles.Count;
-            if (effectiveCountRatio > Single.Epsilon && //do not resample if all particle weights are zero
+            var effectiveCountRatio = (double)_effectiveParticleCount(GetNormalizedWeights(_particles)) / _particles.Count;
+            if (effectiveCountRatio > Single.Epsilon && 
                 effectiveCountRatio < effectiveCountMinRatio)
             {
                 newParticles = Resample(_particles.Count).ToList();
@@ -121,16 +114,15 @@ namespace ParticleFilter
 
             foreach (var p in newParticles)
             {
-                p.Drift();
                 p.Diffuse();
             }
             _particles = new List<FeatureParticle>(newParticles);
         }
 
-        private double effectiveParticleCount(IEnumerable<double> weights)
+        private double _effectiveParticleCount(IEnumerable<double> weights)
         {
             var sumSqr = weights.Sum(x => x * x) + Single.Epsilon;
-            return /*1 if weights are normalized*/ weights.Sum() / sumSqr;
+            return weights.Sum() / sumSqr;
         }
 
         public IList<double> GetNormalizedWeights(IEnumerable<IParticle> particles)

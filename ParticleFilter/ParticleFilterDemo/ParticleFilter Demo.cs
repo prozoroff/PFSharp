@@ -15,15 +15,15 @@ namespace ParticleFilterDemo
     {
         private IParticleFilter<FeatureParticle> _filter;
         private Point _previousPosition = new Point(0,0);
+        private int _predictionScale = 10; //scale factor to get more suitable visualization
 
         public Form1()
         {
             InitializeComponent();
 
             _filter = new FeatureParticleFilter();
-            _filter.GenerateParticles(100,  //particles' count
-                                           FeatureParticle.FromArray, //convert arr => position (create from array)
-                                           new List<IDistribution>()  //position range
+            _filter.GenerateParticles(200,  
+                                           new List<IDistribution>()  
                                            { 
                                                new UniformDistribution(pictureBox1.Height),
                                                new UniformDistribution(pictureBox1.Height)
@@ -38,8 +38,8 @@ namespace ParticleFilterDemo
                 var position = _filter.Particles[i].Position;
                 var X = _previousPosition.X + (int)position.X;
                 var Y = _previousPosition.Y + (int)position.Y;
-                g.DrawLine(Pens.Blue, new Point(X - 1, Y - 1), new Point(X + 1, Y + 1));
-                g.DrawLine(Pens.Blue, new Point(X - 1, Y + 1), new Point(X + 1, Y - 1));
+
+                _drawCross(g, new Point(X,Y), Pens.LightBlue, 2);
             }
         }
 
@@ -78,17 +78,22 @@ namespace ParticleFilterDemo
             {
                 g.Clear(Color.White);
 
-                g.DrawLine(Pens.Red, new Point(e.Location.X - 3, e.Location.Y - 3),
-                    new Point(e.Location.X + 3, e.Location.Y + 3));
-                g.DrawLine(Pens.Red, new Point(e.Location.X - 3, e.Location.Y + 3),
-                    new Point(e.Location.X + 3, e.Location.Y - 3));
+                _drawCross(g, e.Location, Pens.Red, 3);
 
                 _filter.Predict(0.9f);
-                _filter.Update(new FeatureParticle() { Position = new PointF((e.X - _previousPosition.X)*10, (e.Y - _previousPosition.Y)*10) });
+                _filter.Update(new FeatureParticle() 
+                { Position = new PointF((e.X - _previousPosition.X) * _predictionScale,
+                                        (e.Y - _previousPosition.Y) * _predictionScale)});
                 _drawParticles(g);
             }
             pictureBox1.Invalidate();
             _previousPosition = e.Location;
+        }
+
+        private void _drawCross(Graphics graphics, Point point, Pen pen, int size)
+        {
+            graphics.DrawLine(pen, new Point(point.X - size, point.Y - size), new Point(point.X + size, point.Y + size));
+            graphics.DrawLine(pen, new Point(point.X - size, point.Y + size), new Point(point.X + size, point.Y - size));
         }
     }
 }

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ParticleFilter
 {
+    /// <summary>
+    /// Generator of double values with uniform distribution 
+    /// </summary>
     public class UniformDistribution : IDistribution
     {
         private int _maxValue;
@@ -13,11 +16,6 @@ namespace ParticleFilter
         public UniformDistribution(int maxValue)
         {
             _maxValue = maxValue;
-        }
-
-        public object Clone()
-        {
-            throw new NotImplementedException();
         }
 
         public double Generate()

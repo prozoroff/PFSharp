@@ -11,24 +11,19 @@ namespace ParticleFilter
     {
         public double Weight { get; set; }
         public PointF Position { get; set; }
-        private int _variance = 20;//FIXME
+        private int _variance;
 
-        public FeatureParticle()
+        public FeatureParticle(int variance = 15)
         {
-
-        }
-
-        public void Drift()
-        {
-            //we do not have velocity
+            _variance = variance;
         }
 
         public void Diffuse()
         {
             this.Position = new PointF
             {
-                X = this.Position.X + _variance/2 - (float)RandomProportional.NextDouble(_variance),
-                Y = this.Position.Y + _variance/2 - (float)RandomProportional.NextDouble(_variance)
+                X = this.Position.X + (float)RandomProportional.NextDouble(-_variance, _variance),
+                Y = this.Position.Y + (float)RandomProportional.NextDouble(-_variance, _variance)
             };
         }
 
