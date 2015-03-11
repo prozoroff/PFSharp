@@ -46,7 +46,7 @@ namespace ParticleFilter
             }
         }
 
-        public void Resample(int sampleCount)
+        public IList<FeatureParticle> Resample(int sampleCount)
         {
             var resampledParticles = new List<FeatureParticle>(sampleCount);
 
@@ -57,13 +57,15 @@ namespace ParticleFilter
                 newP.Weight = 1d / _particles.Count;
                 resampledParticles.Add(newP);
             }
+
+            return resampledParticles;
         }
 
         IList<FeatureParticle> Draw(int sampleCount)
         {
             /*************** calculate cumulative weights ****************/
             double[] cumulativeWeights = new double[_particles.Count];
-
+            
             int cumSumIdx = 0;
             double cumSum = 0;
             foreach (var p in _particles)
@@ -72,26 +74,27 @@ namespace ParticleFilter
                 cumulativeWeights[cumSumIdx++] = cumSum;
             }
             /*************** calculate cumulative weights ****************/
-
+            
             /*************** re-sample particles ****************/
             var maxCumWeight = cumulativeWeights[_particles.Count - 1];
             var minCumWeight = cumulativeWeights[0];
 
             var drawnParticles = new List<FeatureParticle>();
+
             double initialWeight = 1d / _particles.Count;
-
+            
             Random rand = new Random();
-
+            
             for (int i = 0; i < sampleCount; i++)
             {
                 var randWeight = minCumWeight + rand.NextDouble() * (maxCumWeight - minCumWeight);
-
+            
                 int particleIdx = 0;
                 while (cumulativeWeights[particleIdx] < randWeight) //find particle's index
                 {
                     particleIdx++;
                 }
-
+            
                 var p = _particles[particleIdx];
                 drawnParticles.Add(p);
             }
@@ -100,14 +103,14 @@ namespace ParticleFilter
             return drawnParticles;
         }
 
-        public void Predict(float effectiveCountMinRatio, int sampleCount)
+        public void Predict(float effectiveCountMinRatio)
         {
             List<FeatureParticle> newParticles = null;
             var effectiveCountRatio = (double)effectiveParticleCount(GetNormalizedWeights(_particles)) / _particles.Count;
             if (effectiveCountRatio > Single.Epsilon && //do not resample if all particle weights are zero
                 effectiveCountRatio < effectiveCountMinRatio)
             {
-                Resample(sampleCount);
+                newParticles = Resample(_particles.Count).ToList();
             }
             else
             {
@@ -145,9 +148,14 @@ namespace ParticleFilter
             return normalizedWeights;
         }
 
-        void IParticleFilter<FeatureParticle>.Update()
+        public void Update(FeatureParticle measure)
         {
-            throw new NotImplementedException();
+            foreach (var p in _particles)
+            {
+                var dX = p.Position.X - measure.Position.X;
+                var dY = p.Position.Y - measure.Position.Y;
+                p.Weight = 1 / (Math.Sqrt(dX * dX + dY * dY));
+            }
         }
     }
 }

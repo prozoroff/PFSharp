@@ -12,10 +12,10 @@ namespace ParticleFilter
     public interface IParticleFilter<TParticle>
     {
         void GenerateParticles(int numberOfParticles, Func<double[], TParticle> creator, IList<IDistribution> distributions);
-        void Resample(int sampleCount);
-        void Predict(float effectiveCountMinRatio, int sampleCount);
-        void Update();
+        IList<TParticle> Resample(int sampleCount);
+        void Predict(float effectiveCountMinRatio);
+        void Update(TParticle measure);
 
-        IList<FeatureParticle> Particles { get; }
+        IList<TParticle> Particles { get; }
     }
 }
