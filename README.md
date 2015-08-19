@@ -10,4 +10,6 @@ C# implementation of particle filter
 3. Weighting of each state of Markov model according to observations
 4. Normalization of weights for a new set of states
 
-  Particle filter is well suited for solving the problem of localization, where we need to track the position of the object, which is a hidden value. Jump between the states is the movement of the object, and observation is the result of motion measurements. Both of these values are very noisy. Motion model for the different cases can be quite different, but they are all will take into account the systematic and random errors one way or another.
+Particle filter is well suited for solving the problem of localization, where we need to track the position of the object, which is a hidden value. Jump between the states is the movement of the object, and observation is the result of motion measurements. Both of these values are very noisy. Motion model for the different cases can be quite different, but they are all will take into account the systematic and random errors one way or another.
+
+http://www.youtube.com/watch?v=Sz9cBj0ekIM
